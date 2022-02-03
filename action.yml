@@ -1,0 +1,40 @@
+name: Coverage Diff Comment
+branding:
+  icon: umbrella
+  color: green
+description: Publish diff coverage report as PR comment, and create a coverage badge to display on the readme.
+inputs:
+  github-token:
+    description: A GitHub token to write comments and write the badge to the wiki.
+    required: true
+  coverage-filename:
+    description: Path of the json-summary file to analyze.
+    default: coverage/coverage-summary.json
+    required: false
+  base-summary-filename:
+    description: Name of the json file containing the repository's default branch json-summary stored in the repo wiki.
+    default: base-summary.json
+    required: false
+  allowed-to-fail:
+    description: If true, it will not fail even if the current branch's coverage is lower than the default branch's coverage.
+    default: "false"
+    required: false
+  badge-enabled:
+    description: Whether or not a badge will be generated and stored.
+    default: "true"
+    required: false
+  badge-filename:
+    description: Name of the json file containing badge informations stored in the repo wiki.
+    default: coverage-diff-badge.json
+    required: false
+  badge-threshold-green:
+    description: If the coverage percentage is above or equal to this value, the badge will be green.
+    default: "100"
+    required: false
+  badge-threshold-orange:
+    description: If the coverage percentage is not green and above or equal to this value, the badge will be orange. Otherwise it will be red.
+    default: "70"
+    required: false
+runs:
+  using: node16
+  main: dist/index.js

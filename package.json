@@ -1,0 +1,35 @@
+{
+  "name": "coverage-diff-action",
+  "version": "0.0.0",
+  "description": "Publish diff coverage report as PR comment, and create a coverage badge to display on the readme.",
+  "main": "dist/index.js",
+  "keywords": [
+    "github-action",
+    "diff",
+    "coverage",
+    "report",
+    "json-summary",
+    "badge"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GreatWizard/coverage-diff-action.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Guillaume Gérard",
+    "url": "https://guillaume.sh"
+  },
+  "scripts": {
+    "build": "ncc build src/index.js --license licenses.txt"
+  },
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
+    "coverage-diff": "^1.6.0",
+    "simple-git": "^3.1.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.33.1"
+  }
+}
