@@ -10,6 +10,7 @@ const { isBranch, isMainBranch } = require("./branch");
 const { getShieldURL, getJSONBadge } = require("./badge");
 const { average } = require("./math");
 const { renderDiff } = require("./render");
+const { addComment, deleteExistingComments } = require("./comment");
 
 const { context } = github;
 
@@ -18,7 +19,6 @@ const MARKER = "<!-- This comment was produced by coverage-diff-action -->";
 const WIKI_PATH = path.join(process.env.GITHUB_WORKSPACE, "wiki");
 
 async function run() {
-  const { repo, owner } = context.repo;
   const githubToken = core.getInput("github-token");
   const baseSummaryFilename = core.getInput("base-summary-filename");
   const coverageFilename = core.getInput("coverage-filename");
@@ -40,7 +40,10 @@ async function run() {
     0
   );
 
-  if (isBranch() && (await isMainBranch(octokit, owner, repo))) {
+  if (
+    isBranch() &&
+    (await isMainBranch(octokit, context.repo.owner, context.repo.repo))
+  ) {
     core.info("Running on default branch");
     const BadgeEnabled = core.getBooleanInput("badge-enabled");
     const badgeFilename = core.getInput("badge-filename");
@@ -75,7 +78,7 @@ async function run() {
       return;
     }
 
-    const issue_number = context?.payload?.pull_request?.issue_number;
+    const issue_number = context?.payload?.pull_request?.number;
     const allowedToFail = core.getBooleanInput("allowed-to-fail");
     const base = JSON.parse(
       await readFile(path.join(WIKI_PATH, baseSummaryFilename), "utf8")
@@ -84,27 +87,22 @@ async function run() {
     const diff = coverageDiff.diff(base, head);
 
     if (issue_number) {
-      let comments = await octokit.rest.issues.listComments({
-        issue_number,
-      });
-      github;
-
-      for (const comment of comments.data) {
-        if (comment.body.includes(MARKER)) {
-          await octokit.rest.issues.deleteComment({
-            ...context.repo,
-            comment_id: comment.id,
-          });
-        }
-      }
+      await deleteExistingComments(
+        octokit,
+        context.repo.owner,
+        context.repo.repo,
+        issue_number
+      );
 
       core.info("Add a comment with the diff coverage report");
-      await octokit.rest.issues.createComment({
-        ...context.repo,
+      await addComment(
+        octokit,
+        context.repo.owner,
+        context.repo.repo,
         issue_number,
-        body: `${renderDiff(base, head, diff, { allowedToFail })}
-${MARKER}`,
-      });
+        `${renderDiff(base, head, diff, { allowedToFail })}
+${MARKER}`
+      );
     } else {
       core.info(diff.results);
     }

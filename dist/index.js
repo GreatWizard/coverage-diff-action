@@ -13858,6 +13858,39 @@ module.exports = { isBranch, isMainBranch };
 
 /***/ }),
 
+/***/ 427:
+/***/ ((module) => {
+
+async function addComment(octokit, owner, repo, issue_number, body) {
+  return await octokit.rest.issues.createComment({
+    owner,
+    repo,
+    issue_number,
+    body,
+  });
+}
+
+async function deleteExistingComments(octokit, owner, repo, issue_number) {
+  let comments = await octokit.rest.issues.listComments({
+    owner,
+    repo,
+    issue_number,
+  });
+
+  for (const comment of comments.data) {
+    if (comment.body.includes(MARKER)) {
+      await octokit.rest.issues.deleteComment({
+        comment_id: comment.id,
+      });
+    }
+  }
+}
+
+module.exports = { addComment, deleteExistingComments };
+
+
+/***/ }),
+
 /***/ 109:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -14201,6 +14234,7 @@ const { isBranch, isMainBranch } = __nccwpck_require__(6381);
 const { getShieldURL, getJSONBadge } = __nccwpck_require__(3673);
 const { average } = __nccwpck_require__(8978);
 const { renderDiff } = __nccwpck_require__(1397);
+const { addComment, deleteExistingComments } = __nccwpck_require__(427);
 
 const { context } = github;
 
@@ -14209,7 +14243,6 @@ const MARKER = "<!-- This comment was produced by coverage-diff-action -->";
 const WIKI_PATH = path.join(process.env.GITHUB_WORKSPACE, "wiki");
 
 async function run() {
-  const { repo, owner } = context.repo;
   const githubToken = core.getInput("github-token");
   const baseSummaryFilename = core.getInput("base-summary-filename");
   const coverageFilename = core.getInput("coverage-filename");
@@ -14231,7 +14264,10 @@ async function run() {
     0
   );
 
-  if (isBranch() && (await isMainBranch(octokit, owner, repo))) {
+  if (
+    isBranch() &&
+    (await isMainBranch(octokit, context.repo.owner, context.repo.repo))
+  ) {
     core.info("Running on default branch");
     const BadgeEnabled = core.getBooleanInput("badge-enabled");
     const badgeFilename = core.getInput("badge-filename");
@@ -14266,7 +14302,7 @@ async function run() {
       return;
     }
 
-    const issue_number = context?.payload?.pull_request?.issue_number;
+    const issue_number = context?.payload?.pull_request?.number;
     const allowedToFail = core.getBooleanInput("allowed-to-fail");
     const base = JSON.parse(
       await readFile(path.join(WIKI_PATH, baseSummaryFilename), "utf8")
@@ -14275,27 +14311,22 @@ async function run() {
     const diff = coverageDiff.diff(base, head);
 
     if (issue_number) {
-      let comments = await octokit.rest.issues.listComments({
-        issue_number,
-      });
-      github;
-
-      for (const comment of comments.data) {
-        if (comment.body.includes(MARKER)) {
-          await octokit.rest.issues.deleteComment({
-            ...context.repo,
-            comment_id: comment.id,
-          });
-        }
-      }
+      await deleteExistingComments(
+        octokit,
+        context.repo.owner,
+        context.repo.repo,
+        issue_number
+      );
 
       core.info("Add a comment with the diff coverage report");
-      await octokit.rest.issues.createComment({
-        ...context.repo,
+      await addComment(
+        octokit,
+        context.repo.owner,
+        context.repo.repo,
         issue_number,
-        body: `${renderDiff(base, head, diff, { allowedToFail })}
-${MARKER}`,
-      });
+        `${renderDiff(base, head, diff, { allowedToFail })}
+${MARKER}`
+      );
     } else {
       core.info(diff.results);
     }
