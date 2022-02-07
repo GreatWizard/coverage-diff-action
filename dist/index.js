@@ -13861,25 +13861,27 @@ module.exports = { isBranch, isMainBranch };
 /***/ 427:
 /***/ ((module) => {
 
-async function addComment(octokit, owner, repo, issue_number, body) {
+const MARKER = "<!-- This comment was produced by coverage-diff-action -->";
+
+async function addComment(octokit, repo, issue_number, body) {
   return await octokit.rest.issues.createComment({
-    owner,
-    repo,
+    ...repo,
     issue_number,
-    body,
+    body: `${body}
+${MARKER}`,
   });
 }
 
-async function deleteExistingComments(octokit, owner, repo, issue_number) {
+async function deleteExistingComments(octokit, repo, issue_number) {
   let comments = await octokit.rest.issues.listComments({
-    owner,
-    repo,
+    ...repo,
     issue_number,
   });
 
   for (const comment of comments.data) {
     if (comment.body.includes(MARKER)) {
       await octokit.rest.issues.deleteComment({
+        ...repo,
         comment_id: comment.id,
       });
     }
@@ -13953,7 +13955,8 @@ function renderDiff(base, head, diff, options = {}) {
   }
 
   let countRegression = 0;
-  let table = "";
+  let summaryTitle = "click to open the diff coverage report";
+  let table = [];
 
   Object.keys(diff.diff).forEach((file) => {
     if (file === "total") {
@@ -13971,23 +13974,29 @@ function renderDiff(base, head, diff, options = {}) {
       countRegression++;
     }
 
-    table += `\n| ${regression ? ICONS.KO : ICONS.OK} | ${file} | ${_renderPct(
-      head[file].lines.pct,
-      false
-    )} (${_renderPct(element.lines.pct)}) | ${_renderPct(
-      head[file].branches.pct,
-      false
-    )} (${_renderPct(element.branches.pct)}) | ${_renderPct(
-      head[file].functions.pct,
-      false
-    )} (${_renderPct(element.functions.pct)}) | ${_renderPct(
-      head[file].statements.pct,
-      false
-    )} (${_renderPct(element.statements.pct)}) |`;
+    table.push({
+      icon: regression ? ICONS.KO : ICONS.OK,
+      filename: file,
+      lines: {
+        pct: _renderPct(head[file].lines.pct, false),
+        diff: _renderPct(element.lines.pct),
+      },
+      branches: {
+        pct: _renderPct(head[file].branches.pct, false),
+        diff: _renderPct(element.branches.pct),
+      },
+      functions: {
+        pct: _renderPct(head[file].functions.pct, false),
+        diff: _renderPct(element.functions.pct),
+      },
+      statements: {
+        pct: _renderPct(head[file].statements.pct, false),
+        diff: _renderPct(element.statements.pct),
+      },
+    });
   });
 
-  let summaryTitle = "click to open the diff coverage report";
-  if (countRegression > 0) {
+  if (table.length > 0 && countRegression > 0) {
     summaryTitle = `${countRegression} files with a coverage regression`;
   }
 
@@ -14004,15 +14013,33 @@ function renderDiff(base, head, diff, options = {}) {
 
 | Lines           | Branches           | Functions           | Statements           |
 | --------------- | ------------------ | ------------------- | -------------------- |
-| ${totals.lines} | ${totals.branches} | ${totals.functions} | ${totals.statements} | 
+| ${totals.lines} | ${totals.branches} | ${totals.functions} | ${
+    totals.statements
+  } | 
+${
+  table.length > 0
+    ? `
 
 #### Detailed report
 
 <details><summary>${summaryTitle}</summary>
 
 |   | File | Lines | Branches | Functions | Statements |
-| - | ---- | ----- | -------- | --------- | ---------- |${table}
-</details>
+| - | ---- | ----- | -------- | --------- | ---------- |${table.map(
+        (row) =>
+          `\n| ${row.icon} | ${row.filename} | ${row.lines.pct}${
+            row.lines.diff !== "+0.00%" ? ` (${row.lines.diff})` : ""
+          } | ${row.branches.pct}${
+            row.branches.diff !== "+0.00%" ? ` (${row.branches.diff})` : ""
+          } | ${row.functions.pct}${
+            row.functions.diff !== "+0.00%" ? ` (${row.functions.diff})` : ""
+          } | ${row.statements.pct}${
+            row.statements.diff !== "+0.00%" ? ` (${row.statements.diff})` : ""
+          } |`
+      )}
+</details>`
+    : ""
+}
 `;
 }
 
@@ -14238,8 +14265,6 @@ const { addComment, deleteExistingComments } = __nccwpck_require__(427);
 
 const { context } = github;
 
-const MARKER = "<!-- This comment was produced by coverage-diff-action -->";
-
 const WIKI_PATH = path.join(process.env.GITHUB_WORKSPACE, "wiki");
 
 async function run() {
@@ -14313,19 +14338,16 @@ async function run() {
     if (issue_number) {
       await deleteExistingComments(
         octokit,
-        context.repo.owner,
-        context.repo.repo,
+        context.repo,
         issue_number
       );
 
       core.info("Add a comment with the diff coverage report");
       await addComment(
         octokit,
-        context.repo.owner,
-        context.repo.repo,
+        context.repo,
         issue_number,
-        `${renderDiff(base, head, diff, { allowedToFail })}
-${MARKER}`
+        renderDiff(base, head, diff, { allowedToFail })
       );
     } else {
       core.info(diff.results);

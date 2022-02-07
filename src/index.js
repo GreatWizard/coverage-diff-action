@@ -14,8 +14,6 @@ const { addComment, deleteExistingComments } = require("./comment");
 
 const { context } = github;
 
-const MARKER = "<!-- This comment was produced by coverage-diff-action -->";
-
 const WIKI_PATH = path.join(process.env.GITHUB_WORKSPACE, "wiki");
 
 async function run() {
@@ -89,19 +87,16 @@ async function run() {
     if (issue_number) {
       await deleteExistingComments(
         octokit,
-        context.repo.owner,
-        context.repo.repo,
+        context.repo,
         issue_number
       );
 
       core.info("Add a comment with the diff coverage report");
       await addComment(
         octokit,
-        context.repo.owner,
-        context.repo.repo,
+        context.repo,
         issue_number,
-        `${renderDiff(base, head, diff, { allowedToFail })}
-${MARKER}`
+        renderDiff(base, head, diff, { allowedToFail })
       );
     } else {
       core.info(diff.results);
