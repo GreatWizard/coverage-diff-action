@@ -14297,7 +14297,7 @@ async function run() {
     const BadgeEnabled = core.getBooleanInput("badge-enabled");
     const badgeFilename = core.getInput("badge-filename");
 
-    core.info("Saving summary-json report into the repo wiki");
+    core.info("Saving json-summary report into the repo wiki");
     await copyFile(coverageFilename, path.join(WIKI_PATH, baseSummaryFilename));
 
     if (BadgeEnabled) {
@@ -14323,7 +14323,7 @@ async function run() {
   } else {
     core.info("Running on pull request branch");
     if (!existsSync(path.join(WIKI_PATH, baseSummaryFilename))) {
-      core.info("No base summary-json found");
+      core.info("No base json-summary found");
       return;
     }
 
