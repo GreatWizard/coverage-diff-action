@@ -14266,7 +14266,7 @@ async function run() {
       return;
     }
 
-    const { number: issue_number } = context.payload.pull_request;
+    const issue_number = context?.payload?.pull_request?.issue_number;
     const allowedToFail = core.getBooleanInput("allowed-to-fail");
     const base = JSON.parse(
       await readFile(path.join(WIKI_PATH, baseSummaryFilename), "utf8")
@@ -14274,28 +14274,31 @@ async function run() {
 
     const diff = coverageDiff.diff(base, head);
 
-    let comments = await octokit.rest.issues.listComments({
-      ...context.repo,
-      issue_number,
-    });
-    github;
+    if (issue_number) {
+      let comments = await octokit.rest.issues.listComments({
+        issue_number,
+      });
+      github;
 
-    for (const comment of comments.data) {
-      if (comment.body.includes(MARKER)) {
-        await octokit.rest.issues.deleteComment({
-          ...context.repo,
-          comment_id: comment.id,
-        });
+      for (const comment of comments.data) {
+        if (comment.body.includes(MARKER)) {
+          await octokit.rest.issues.deleteComment({
+            ...context.repo,
+            comment_id: comment.id,
+          });
+        }
       }
-    }
 
-    core.info("Add a comment with the diff coverage report");
-    await octokit.rest.issues.createComment({
-      ...context.repo,
-      issue_number,
-      body: `${renderDiff(base, head, diff, { allowedToFail })}
+      core.info("Add a comment with the diff coverage report");
+      await octokit.rest.issues.createComment({
+        ...context.repo,
+        issue_number,
+        body: `${renderDiff(base, head, diff, { allowedToFail })}
 ${MARKER}`,
-    });
+      });
+    } else {
+      core.info(diff.results);
+    }
 
     if (!allowedToFail && diff.regression) {
       throw new Error("The coverage is below the minimum threshold");
