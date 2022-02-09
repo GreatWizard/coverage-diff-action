@@ -1,4 +1,4 @@
-# GitHub Action: Coverage Diff Comment
+# GitHub Action: Coverage Diff
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Liberapay](https://img.shields.io/liberapay/patrons/GreatWizard.svg?logo=liberapay)](https://liberapay.com/GreatWizard/)
@@ -57,7 +57,7 @@ jobs:
           node-version: 16
           cache: npm
       - run: npm install
-      - run: npm test
+      - run: npm run test
       - name: Coverage Diff
         uses: greatwizard/coverage-diff-action@v1
         with:
@@ -88,7 +88,7 @@ jobs:
           node-version: 16
           cache: npm
       - run: npm install
-      - run: npm test
+      - run: npm run test
       - name: Coverage Diff
         uses: greatwizard/coverage-diff-action@v1
         with:
@@ -123,7 +123,7 @@ You can also pin a specific version such as `v1.0.0` (a tag).
 
 ### What about external pull requests
 
-This action actually fails for external pull requests.
+Currently this action fails for external pull requests.
 The problem is described [here](https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/)
 and [here](https://securitylab.github.com/research/github-actions-preventing-pwn-requests/).
 
