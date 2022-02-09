@@ -13893,6 +13893,140 @@ module.exports = { addComment, deleteExistingComments };
 
 /***/ }),
 
+/***/ 1752:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const coverageDiff = __nccwpck_require__(6387);
+
+const ICONS = {
+  OK: "✅",
+  WARN: "⚠️",
+  KO: "🔴",
+};
+
+const CRITERIAS = ["lines", "branches", "functions", "statements"];
+
+function _renderPct(pct, addSign = true) {
+  if (addSign && pct >= 0) {
+    return `+${pct.toFixed(2)}%`;
+  }
+  return `${pct.toFixed(2)}%`;
+}
+
+function computeDiff(base, head, options = {}) {
+  const diff = coverageDiff.diff(base, head);
+
+  let totalTitle = "Total coverage";
+  let summaryTitle = "click to open the diff coverage report";
+
+  let countRegression = 0;
+  let table = [];
+  Object.keys(diff.diff).forEach((file) => {
+    if (file === "total") {
+      return;
+    }
+
+    const element = diff.diff[file];
+
+    if (CRITERIAS.every((criteria) => element[criteria].pct === 0)) {
+      return;
+    }
+
+    const fileRegression = CRITERIAS.some(
+      (criteria) => element[criteria].pct < 0
+    );
+    if (fileRegression) {
+      countRegression++;
+    }
+
+    table.push({
+      icon: fileRegression ? ICONS.KO : ICONS.OK,
+      filename: file,
+      lines: {
+        pct: _renderPct(head[file].lines.pct, false),
+        diff: _renderPct(element.lines.pct),
+      },
+      branches: {
+        pct: _renderPct(head[file].branches.pct, false),
+        diff: _renderPct(element.branches.pct),
+      },
+      functions: {
+        pct: _renderPct(head[file].functions.pct, false),
+        diff: _renderPct(element.functions.pct),
+      },
+      statements: {
+        pct: _renderPct(head[file].statements.pct, false),
+        diff: _renderPct(element.statements.pct),
+      },
+    });
+  });
+
+  if (table.length > 0 && countRegression > 0) {
+    summaryTitle = `${countRegression} files with a coverage regression`;
+  }
+
+  let totals = {};
+  let globalRegression = false;
+  CRITERIAS.forEach((criteria) => {
+    let diffPct = head.total[criteria].pct - base.total[criteria].pct;
+    if (diffPct < 0) {
+      globalRegression = true;
+    }
+    totals[criteria] = `${_renderPct(
+      head.total[criteria].pct,
+      false
+    )} (${_renderPct(diffPct)})`;
+  });
+
+  if (globalRegression) {
+    totalTitle = `${
+      options.allowedToFail ? ICONS.WARN : ICONS.KO
+    } Total coverage is lower than the default branch`;
+  }
+
+  return {
+    regression: globalRegression,
+    markdown: `
+### ${totalTitle}
+
+| Lines           | Branches           | Functions           | Statements           |
+| --------------- | ------------------ | ------------------- | -------------------- |
+| ${totals.lines} | ${totals.branches} | ${totals.functions} | ${
+      totals.statements
+    } | 
+${
+  table.length > 0
+    ? `
+
+#### Detailed report
+
+<details><summary>${summaryTitle}</summary>
+
+|   | File | Lines | Branches | Functions | Statements |
+| - | ---- | ----- | -------- | --------- | ---------- |${table.map(
+        (row) =>
+          `\n| ${row.icon} | ${row.filename} | ${row.lines.pct}${
+            row.lines.diff !== "+0.00%" ? ` (${row.lines.diff})` : ""
+          } | ${row.branches.pct}${
+            row.branches.diff !== "+0.00%" ? ` (${row.branches.diff})` : ""
+          } | ${row.functions.pct}${
+            row.functions.diff !== "+0.00%" ? ` (${row.functions.diff})` : ""
+          } | ${row.statements.pct}${
+            row.statements.diff !== "+0.00%" ? ` (${row.statements.diff})` : ""
+          } |`
+      )}
+</details>`
+    : ""
+}
+`,
+  };
+}
+
+module.exports = { computeDiff };
+
+
+/***/ }),
+
 /***/ 109:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -13924,126 +14058,6 @@ function average(arr, fixed = 2) {
 }
 
 module.exports = { average };
-
-
-/***/ }),
-
-/***/ 1397:
-/***/ ((module) => {
-
-const ICONS = {
-  OK: "✅",
-  WARN: "⚠️",
-  KO: "🔴",
-};
-
-const CRITERIAS = ["lines", "branches", "functions", "statements"];
-
-function _renderPct(pct, addSign = true) {
-  if (addSign && pct >= 0) {
-    return `+${pct.toFixed(2)}%`;
-  }
-  return `${pct.toFixed(2)}%`;
-}
-
-function renderDiff(base, head, diff, options = {}) {
-  let totalTitle = "Total coverage";
-  if (diff.regression) {
-    totalTitle = `${
-      options.allowedToFail ? ICONS.WARN : ICONS.KO
-    } Total coverage is lower than the default branch`;
-  }
-
-  let countRegression = 0;
-  let summaryTitle = "click to open the diff coverage report";
-  let table = [];
-
-  Object.keys(diff.diff).forEach((file) => {
-    if (file === "total") {
-      return;
-    }
-
-    let element = diff.diff[file];
-
-    if (CRITERIAS.every((criteria) => element[criteria].pct === 0)) {
-      return;
-    }
-
-    let regression = CRITERIAS.some((criteria) => element[criteria].pct < 0);
-    if (regression) {
-      countRegression++;
-    }
-
-    table.push({
-      icon: regression ? ICONS.KO : ICONS.OK,
-      filename: file,
-      lines: {
-        pct: _renderPct(head[file].lines.pct, false),
-        diff: _renderPct(element.lines.pct),
-      },
-      branches: {
-        pct: _renderPct(head[file].branches.pct, false),
-        diff: _renderPct(element.branches.pct),
-      },
-      functions: {
-        pct: _renderPct(head[file].functions.pct, false),
-        diff: _renderPct(element.functions.pct),
-      },
-      statements: {
-        pct: _renderPct(head[file].statements.pct, false),
-        diff: _renderPct(element.statements.pct),
-      },
-    });
-  });
-
-  if (table.length > 0 && countRegression > 0) {
-    summaryTitle = `${countRegression} files with a coverage regression`;
-  }
-
-  let totals = {};
-  CRITERIAS.forEach((criteria) => {
-    totals[criteria] = `${_renderPct(
-      head.total[criteria].pct,
-      false
-    )} (${_renderPct(head.total[criteria].pct - base.total[criteria].pct)})`;
-  });
-
-  return `
-### ${totalTitle}
-
-| Lines           | Branches           | Functions           | Statements           |
-| --------------- | ------------------ | ------------------- | -------------------- |
-| ${totals.lines} | ${totals.branches} | ${totals.functions} | ${
-    totals.statements
-  } | 
-${
-  table.length > 0
-    ? `
-
-#### Detailed report
-
-<details><summary>${summaryTitle}</summary>
-
-|   | File | Lines | Branches | Functions | Statements |
-| - | ---- | ----- | -------- | --------- | ---------- |${table.map(
-        (row) =>
-          `\n| ${row.icon} | ${row.filename} | ${row.lines.pct}${
-            row.lines.diff !== "+0.00%" ? ` (${row.lines.diff})` : ""
-          } | ${row.branches.pct}${
-            row.branches.diff !== "+0.00%" ? ` (${row.branches.diff})` : ""
-          } | ${row.functions.pct}${
-            row.functions.diff !== "+0.00%" ? ` (${row.functions.diff})` : ""
-          } | ${row.statements.pct}${
-            row.statements.diff !== "+0.00%" ? ` (${row.statements.diff})` : ""
-          } |`
-      )}
-</details>`
-    : ""
-}
-`;
-}
-
-module.exports = { renderDiff };
 
 
 /***/ }),
@@ -14254,13 +14268,12 @@ const { existsSync } = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
-const coverageDiff = __nccwpck_require__(6387);
 
 const { gitClone, gitUpdate } = __nccwpck_require__(109);
 const { isBranch, isMainBranch } = __nccwpck_require__(6381);
 const { getShieldURL, getJSONBadge } = __nccwpck_require__(3673);
 const { average } = __nccwpck_require__(8978);
-const { renderDiff } = __nccwpck_require__(1397);
+const { computeDiff } = __nccwpck_require__(1752);
 const { addComment, deleteExistingComments } = __nccwpck_require__(427);
 
 const { context } = github;
@@ -14333,28 +14346,19 @@ async function run() {
       await readFile(path.join(WIKI_PATH, baseSummaryFilename), "utf8")
     );
 
-    const diff = coverageDiff.diff(base, head);
+    const diff = computeDiff(base, head, { allowedToFail });
 
     if (issue_number) {
-      await deleteExistingComments(
-        octokit,
-        context.repo,
-        issue_number
-      );
+      await deleteExistingComments(octokit, context.repo, issue_number);
 
       core.info("Add a comment with the diff coverage report");
-      await addComment(
-        octokit,
-        context.repo,
-        issue_number,
-        renderDiff(base, head, diff, { allowedToFail })
-      );
+      await addComment(octokit, context.repo, issue_number, diff.markdown);
     } else {
       core.info(diff.results);
     }
 
     if (!allowedToFail && diff.regression) {
-      throw new Error("The coverage is below the minimum threshold");
+      throw new Error("Total coverage is lower than the default branch");
     }
   }
 }

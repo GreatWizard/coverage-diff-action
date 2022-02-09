@@ -3,13 +3,12 @@ const { existsSync } = require("fs");
 const path = require("path");
 const core = require("@actions/core");
 const github = require("@actions/github");
-const coverageDiff = require("coverage-diff");
 
 const { gitClone, gitUpdate } = require("./git");
 const { isBranch, isMainBranch } = require("./branch");
 const { getShieldURL, getJSONBadge } = require("./badge");
 const { average } = require("./math");
-const { renderDiff } = require("./render");
+const { computeDiff } = require("./diff");
 const { addComment, deleteExistingComments } = require("./comment");
 
 const { context } = github;
@@ -82,28 +81,19 @@ async function run() {
       await readFile(path.join(WIKI_PATH, baseSummaryFilename), "utf8")
     );
 
-    const diff = coverageDiff.diff(base, head);
+    const diff = computeDiff(base, head, { allowedToFail });
 
     if (issue_number) {
-      await deleteExistingComments(
-        octokit,
-        context.repo,
-        issue_number
-      );
+      await deleteExistingComments(octokit, context.repo, issue_number);
 
       core.info("Add a comment with the diff coverage report");
-      await addComment(
-        octokit,
-        context.repo,
-        issue_number,
-        renderDiff(base, head, diff, { allowedToFail })
-      );
+      await addComment(octokit, context.repo, issue_number, diff.markdown);
     } else {
       core.info(diff.results);
     }
 
     if (!allowedToFail && diff.regression) {
-      throw new Error("The coverage is below the minimum threshold");
+      throw new Error("Total coverage is lower than the default branch");
     }
   }
 }

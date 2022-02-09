@@ -1,3 +1,5 @@
+const coverageDiff = require("coverage-diff");
+
 const ICONS = {
   OK: "✅",
   WARN: "⚠️",
@@ -13,36 +15,34 @@ function _renderPct(pct, addSign = true) {
   return `${pct.toFixed(2)}%`;
 }
 
-function renderDiff(base, head, diff, options = {}) {
+function computeDiff(base, head, options = {}) {
+  const diff = coverageDiff.diff(base, head);
+
   let totalTitle = "Total coverage";
-  if (diff.regression) {
-    totalTitle = `${
-      options.allowedToFail ? ICONS.WARN : ICONS.KO
-    } Total coverage is lower than the default branch`;
-  }
+  let summaryTitle = "click to open the diff coverage report";
 
   let countRegression = 0;
-  let summaryTitle = "click to open the diff coverage report";
   let table = [];
-
   Object.keys(diff.diff).forEach((file) => {
     if (file === "total") {
       return;
     }
 
-    let element = diff.diff[file];
+    const element = diff.diff[file];
 
     if (CRITERIAS.every((criteria) => element[criteria].pct === 0)) {
       return;
     }
 
-    let regression = CRITERIAS.some((criteria) => element[criteria].pct < 0);
-    if (regression) {
+    const fileRegression = CRITERIAS.some(
+      (criteria) => element[criteria].pct < 0
+    );
+    if (fileRegression) {
       countRegression++;
     }
 
     table.push({
-      icon: regression ? ICONS.KO : ICONS.OK,
+      icon: fileRegression ? ICONS.KO : ICONS.OK,
       filename: file,
       lines: {
         pct: _renderPct(head[file].lines.pct, false),
@@ -68,21 +68,34 @@ function renderDiff(base, head, diff, options = {}) {
   }
 
   let totals = {};
+  let globalRegression = false;
   CRITERIAS.forEach((criteria) => {
+    let diffPct = head.total[criteria].pct - base.total[criteria].pct;
+    if (diffPct < 0) {
+      globalRegression = true;
+    }
     totals[criteria] = `${_renderPct(
       head.total[criteria].pct,
       false
-    )} (${_renderPct(head.total[criteria].pct - base.total[criteria].pct)})`;
+    )} (${_renderPct(diffPct)})`;
   });
 
-  return `
+  if (globalRegression) {
+    totalTitle = `${
+      options.allowedToFail ? ICONS.WARN : ICONS.KO
+    } Total coverage is lower than the default branch`;
+  }
+
+  return {
+    regression: globalRegression,
+    markdown: `
 ### ${totalTitle}
 
 | Lines           | Branches           | Functions           | Statements           |
 | --------------- | ------------------ | ------------------- | -------------------- |
 | ${totals.lines} | ${totals.branches} | ${totals.functions} | ${
-    totals.statements
-  } | 
+      totals.statements
+    } | 
 ${
   table.length > 0
     ? `
@@ -107,7 +120,8 @@ ${
 </details>`
     : ""
 }
-`;
+`,
+  };
 }
 
-module.exports = { renderDiff };
+module.exports = { computeDiff };
