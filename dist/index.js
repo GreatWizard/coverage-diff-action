@@ -13962,7 +13962,9 @@ function computeDiff(base, head, options = {}) {
   });
 
   if (table.length > 0 && countRegression > 0) {
-    summaryTitle = `${countRegression} files with a coverage regression`;
+    summaryTitle = `${countRegression} file${
+      countRegression > 1 ? "s" : ""
+    } with a coverage regression`;
   }
 
   let totals = {};
