@@ -35,6 +35,17 @@ inputs:
     description: If the coverage percentage is not green and above or equal to this value, the badge will be orange. Otherwise it will be red.
     default: "70"
     required: false
+  storage:
+    description: Define the place where the assets are uploaded to.
+    default: "wiki"
+    required: false
+  git-url:
+    description: Define the URL use by the git storage, defaults to the current project.
+    required: false
+  git-branch:
+    description: Define the branch name use by the git storage.
+    default: "coverage-diff"
+    required: false
 runs:
   using: node16
   main: dist/index.js
