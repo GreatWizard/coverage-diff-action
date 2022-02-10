@@ -1,11 +1,16 @@
-const { readFile, writeFile, copyFile } = require("fs/promises");
+const {
+  readFile,
+  writeFile,
+  copyFile,
+  mkdir,
+  mkdtemp,
+} = require("fs/promises");
 const { existsSync } = require("fs");
 const path = require("path");
 const core = require("@actions/core");
 const github = require("@actions/github");
 
-const { gitClone, gitUpdate } = require("./git");
-const { isBranch, isMainBranch } = require("./branch");
+const { isBranch, getMainBranch, isMainBranch } = require("./branch");
 const { getShieldURL, getJSONBadge } = require("./badge");
 const { average } = require("./math");
 const { computeDiff } = require("./diff");
@@ -13,20 +18,49 @@ const { addComment, deleteExistingComments } = require("./comment");
 
 const { context } = github;
 
-const WIKI_PATH = path.join(process.env.GITHUB_WORKSPACE, "wiki");
-
 async function run() {
+  await mkdir(path.join(process.env.GITHUB_WORKSPACE, "tmp"), {
+    recursive: true,
+  });
+  const storagePath = await mkdtemp(
+    path.join(process.env.GITHUB_WORKSPACE, "tmp", "coverage-diff-")
+  );
+
   const githubToken = core.getInput("github-token");
   const baseSummaryFilename = core.getInput("base-summary-filename");
   const coverageFilename = core.getInput("coverage-filename");
   const badgeThresholdOrange = core.getInput("badge-threshold-orange");
+  const storage = core.getInput("storage");
 
-  core.info(`Cloning wiki repository...`);
+  let storageModule = undefined;
+  if (storage === "wiki" || storage === "github" || storage === "git") {
+    storageModule = "git";
+  }
+  if (!storageModule) {
+    core.info(`Unknown storage: ${storage}`);
+    return;
+  }
+  const {
+    storagePrepare,
+    storageCommit,
+  } = require(`./storages/${storageModule}`);
 
-  await gitClone(
-    `https://x-access-token:${githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.wiki.git`,
-    WIKI_PATH
-  );
+  const storageOption = {};
+  if (storage === "wiki") {
+    storageOption.url = `https://x-access-token:${githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.wiki.git`;
+  } else if (storage === "github") {
+    storageOption.url = `https://x-access-token:${githubToken}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+    storageOption.branch = core.getInput("git-branch");
+  } else if (storage === "git") {
+    storageOption.url = core.getInput("git-url");
+    if (!storageOption.url) {
+      throw new Error("git-url is required");
+    }
+    storageOption.branch = core.getInput("git-branch");
+  }
+
+  core.info(`Cloning repository...`);
+  await storagePrepare(storagePath, storageOption);
 
   const octokit = github.getOctokit(githubToken);
 
@@ -44,33 +78,51 @@ async function run() {
     core.info("Running on default branch");
     const BadgeEnabled = core.getBooleanInput("badge-enabled");
     const badgeFilename = core.getInput("badge-filename");
+    const files = [];
 
-    core.info("Saving json-summary report into the repo wiki");
-    await copyFile(coverageFilename, path.join(WIKI_PATH, baseSummaryFilename));
+    core.info("Saving base json-summary report");
+    await copyFile(
+      coverageFilename,
+      path.join(storagePath, baseSummaryFilename)
+    );
+    files.push(baseSummaryFilename);
 
     if (BadgeEnabled) {
-      core.info("Saving Badge into the repo wiki");
+      core.info("Saving badge");
 
       const badgeThresholdGreen = core.getInput("badge-threshold-green");
 
       await writeFile(
-        path.join(WIKI_PATH, badgeFilename),
+        path.join(storagePath, badgeFilename),
         JSON.stringify(
           getJSONBadge(pct, badgeThresholdGreen, badgeThresholdOrange)
         )
       );
+      files.push(badgeFilename);
     }
 
-    await gitUpdate(WIKI_PATH);
+    await storageCommit(storagePath, files, storageOption);
 
     if (BadgeEnabled) {
-      const url = `https://raw.githubusercontent.com/wiki/${process.env.GITHUB_REPOSITORY}/${badgeFilename}`;
-      core.info(`Badge JSON stored at ${url}`);
-      core.info(`Badge URL: ${getShieldURL(url)}`);
+      const url =
+        storage === "wiki"
+          ? `https://raw.githubusercontent.com/wiki/${process.env.GITHUB_REPOSITORY}/${badgeFilename}`
+          : storage === "github"
+          ? `https://raw.githubusercontent.com/${
+              process.env.GITHUB_REPOSITORY
+            }/${
+              storageOption.branch ||
+              getMainBranch(octokit, context.repo.owner, context.repo.repo)
+            }/${badgeFilename}`
+          : undefined;
+      if (url) {
+        core.info(`Badge JSON stored at ${url}`);
+        core.info(`Badge URL: ${getShieldURL(url)}`);
+      }
     }
   } else {
     core.info("Running on pull request branch");
-    if (!existsSync(path.join(WIKI_PATH, baseSummaryFilename))) {
+    if (!existsSync(path.join(storagePath, baseSummaryFilename))) {
       core.info("No base json-summary found");
       return;
     }
@@ -78,7 +130,7 @@ async function run() {
     const issue_number = context?.payload?.pull_request?.number;
     const allowedToFail = core.getBooleanInput("allowed-to-fail");
     const base = JSON.parse(
-      await readFile(path.join(WIKI_PATH, baseSummaryFilename), "utf8")
+      await readFile(path.join(STORAGE_PATH, baseSummaryFilename), "utf8")
     );
 
     const diff = computeDiff(base, head, { allowedToFail });
