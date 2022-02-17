@@ -14265,7 +14265,13 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const { readFile, writeFile, copyFile } = __nccwpck_require__(3292);
+const {
+  readFile,
+  writeFile,
+  copyFile,
+  mkdir,
+  mkdtemp,
+} = __nccwpck_require__(3292);
 const { existsSync } = __nccwpck_require__(7147);
 const path = __nccwpck_require__(1017);
 const core = __nccwpck_require__(2186);
@@ -14280,9 +14286,12 @@ const { addComment, deleteExistingComments } = __nccwpck_require__(427);
 
 const { context } = github;
 
-const WIKI_PATH = path.join(process.env.GITHUB_WORKSPACE, "wiki");
-
 async function run() {
+  const tmpPath = await mkdir(path.join(process.env.GITHUB_WORKSPACE, "tmp"), {
+    recursive: true,
+  });
+  const WIKI_PATH = await mkdtemp(path.join(tmpPath, "coverage-diff-"));
+
   const githubToken = core.getInput("github-token");
   const baseSummaryFilename = core.getInput("base-summary-filename");
   const coverageFilename = core.getInput("coverage-filename");

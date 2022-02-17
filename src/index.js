@@ -1,4 +1,10 @@
-const { readFile, writeFile, copyFile } = require("fs/promises");
+const {
+  readFile,
+  writeFile,
+  copyFile,
+  mkdir,
+  mkdtemp,
+} = require("fs/promises");
 const { existsSync } = require("fs");
 const path = require("path");
 const core = require("@actions/core");
@@ -13,9 +19,12 @@ const { addComment, deleteExistingComments } = require("./comment");
 
 const { context } = github;
 
-const WIKI_PATH = path.join(process.env.GITHUB_WORKSPACE, "wiki");
-
 async function run() {
+  const tmpPath = await mkdir(path.join(process.env.GITHUB_WORKSPACE, "tmp"), {
+    recursive: true,
+  });
+  const WIKI_PATH = await mkdtemp(path.join(tmpPath, "coverage-diff-"));
+
   const githubToken = core.getInput("github-token");
   const baseSummaryFilename = core.getInput("base-summary-filename");
   const coverageFilename = core.getInput("coverage-filename");
