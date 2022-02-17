@@ -1,6 +1,6 @@
 {
   "name": "coverage-diff-action",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Publish diff coverage report as PR comment, and create a coverage badge to display on the readme.",
   "main": "dist/index.js",
   "keywords": [
