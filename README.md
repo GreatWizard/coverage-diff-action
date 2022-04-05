@@ -114,6 +114,9 @@ jobs:
 
           # If the coverage percentage is not green and above or equal to this value, the badge will be orange. Otherwise it will be red.
           badge-threshold-orange: 70
+
+          # Override the default branch name.
+          default-branch: next
 ```
 
 ### Pinning

@@ -35,6 +35,9 @@ inputs:
     description: If the coverage percentage is not green and above or equal to this value, the badge will be orange. Otherwise it will be red.
     default: "70"
     required: false
+  default-branch:
+    description: Override the default branch name.
+    required: false
 runs:
   using: node16
   main: dist/index.js
