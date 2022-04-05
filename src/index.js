@@ -11,7 +11,7 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 
 const { gitClone, gitUpdate } = require("./git");
-const { isBranch, isMainBranch } = require("./branch");
+const { isBranch, isDefaultBranch } = require("./branch");
 const { getShieldURL, getJSONBadge } = require("./badge");
 const { average } = require("./math");
 const { computeDiff } = require("./diff");
@@ -29,6 +29,7 @@ async function run() {
   const baseSummaryFilename = core.getInput("base-summary-filename");
   const coverageFilename = core.getInput("coverage-filename");
   const badgeThresholdOrange = core.getInput("badge-threshold-orange");
+  const defaultBranch = core.getInput("default-branch");
 
   core.info(`Cloning wiki repository...`);
 
@@ -48,7 +49,8 @@ async function run() {
 
   if (
     isBranch() &&
-    (await isMainBranch(octokit, context.repo.owner, context.repo.repo))
+    (defaultBranch === process.env.GITHUB_REF_NAME ||
+      (await isDefaultBranch(octokit, context.repo.owner, context.repo.repo)))
   ) {
     core.info("Running on default branch");
     const BadgeEnabled = core.getBooleanInput("badge-enabled");

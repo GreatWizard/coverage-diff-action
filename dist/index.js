@@ -13845,7 +13845,7 @@ function isBranch() {
   return process.env.GITHUB_REF.startsWith("refs/heads/");
 }
 
-async function isMainBranch(octokit, owner, repo) {
+async function isDefaultBranch(octokit, owner, repo) {
   let response = await octokit.rest.repos.get({
     owner,
     repo,
@@ -13853,7 +13853,7 @@ async function isMainBranch(octokit, owner, repo) {
   return response.data.default_branch === process.env.GITHUB_REF_NAME;
 }
 
-module.exports = { isBranch, isMainBranch };
+module.exports = { isBranch, isDefaultBranch };
 
 
 /***/ }),
@@ -14278,7 +14278,7 @@ const core = __nccwpck_require__(2186);
 const github = __nccwpck_require__(5438);
 
 const { gitClone, gitUpdate } = __nccwpck_require__(109);
-const { isBranch, isMainBranch } = __nccwpck_require__(6381);
+const { isBranch, isDefaultBranch } = __nccwpck_require__(6381);
 const { getShieldURL, getJSONBadge } = __nccwpck_require__(3673);
 const { average } = __nccwpck_require__(8978);
 const { computeDiff } = __nccwpck_require__(1752);
@@ -14296,6 +14296,7 @@ async function run() {
   const baseSummaryFilename = core.getInput("base-summary-filename");
   const coverageFilename = core.getInput("coverage-filename");
   const badgeThresholdOrange = core.getInput("badge-threshold-orange");
+  const defaultBranch = core.getInput("default-branch");
 
   core.info(`Cloning wiki repository...`);
 
@@ -14315,7 +14316,8 @@ async function run() {
 
   if (
     isBranch() &&
-    (await isMainBranch(octokit, context.repo.owner, context.repo.repo))
+    (defaultBranch === process.env.GITHUB_REF_NAME ||
+      (await isDefaultBranch(octokit, context.repo.owner, context.repo.repo)))
   ) {
     core.info("Running on default branch");
     const BadgeEnabled = core.getBooleanInput("badge-enabled");
