@@ -19,6 +19,10 @@ inputs:
     description: If true, it will not fail even if the current branch's coverage is lower than the default branch's coverage.
     default: "false"
     required: false
+  pr-comment:
+    description: If true, it will add a sticky comment with the diff coverage report to the PR.
+    default: "true"
+    required: false
   badge-enabled:
     description: Whether or not a badge will be generated and stored.
     default: "true"

@@ -103,6 +103,9 @@ jobs:
           # If true, it will not fail even if the current branch's coverage is lower than the default branch's coverage.
           allowed-to-fail: false
 
+          # If true, it will add a sticky comment with the diff coverage report to the PR.
+          pr-comment: true
+
           # Whether or not a badge will be generated and stored.
           badge-enabled: true
 

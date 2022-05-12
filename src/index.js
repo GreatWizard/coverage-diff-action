@@ -86,17 +86,20 @@ async function run() {
 
     const issue_number = context?.payload?.pull_request?.number;
     const allowedToFail = core.getBooleanInput("allowed-to-fail");
+    const prComment = core.getBooleanInput("pr-comment");
     const base = JSON.parse(
       await readFile(path.join(WIKI_PATH, baseSummaryFilename), "utf8")
     );
 
     const diff = computeDiff(base, head, { allowedToFail });
 
-    if (issue_number) {
+    if (issue_number && prComment) {
       await deleteExistingComments(octokit, context.repo, issue_number);
 
       core.info("Add a comment with the diff coverage report");
       await addComment(octokit, context.repo, issue_number, diff.markdown);
+    } else if(issue_number) {
+      core.info(diff.markdown);
     } else {
       core.info(diff.results);
     }
