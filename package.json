@@ -30,6 +30,6 @@
     "simple-git": "^3.7.1"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.33.4"
+    "@vercel/ncc": "^0.34.0"
   }
 }

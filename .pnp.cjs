@@ -35,7 +35,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@actions/core", "npm:1.8.2"],\
             ["@actions/github", "npm:5.0.3"],\
-            ["@vercel/ncc", "npm:0.33.4"],\
+            ["@vercel/ncc", "npm:0.34.0"],\
             ["coverage-diff", "npm:1.6.1"],\
             ["simple-git", "npm:3.7.1"]\
           ],\
@@ -278,10 +278,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["@vercel/ncc", [\
-        ["npm:0.33.4", {\
-          "packageLocation": "./.yarn/cache/@vercel-ncc-npm-0.33.4-6c7bae9624-e6093efc3b.zip/node_modules/@vercel/ncc/",\
+        ["npm:0.34.0", {\
+          "packageLocation": "./.yarn/cache/@vercel-ncc-npm-0.34.0-32b176acac-3282578e99.zip/node_modules/@vercel/ncc/",\
           "packageDependencies": [\
-            ["@vercel/ncc", "npm:0.33.4"],\
+            ["@vercel/ncc", "npm:0.34.0"],\
             ["node-gyp", "npm:9.0.0"]\
           ],\
           "linkType": "HARD"\
@@ -484,7 +484,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["coverage-diff-action", "workspace:."],\
             ["@actions/core", "npm:1.8.2"],\
             ["@actions/github", "npm:5.0.3"],\
-            ["@vercel/ncc", "npm:0.33.4"],\
+            ["@vercel/ncc", "npm:0.34.0"],\
             ["coverage-diff", "npm:1.6.1"],\
             ["simple-git", "npm:3.7.1"]\
           ],\
