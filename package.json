@@ -21,7 +21,7 @@
     "url": "https://guillaume.sh"
   },
   "scripts": {
-    "build": "ncc build src/index.js --license licenses.txt"
+    "build": "ncc build -m src/index.js --license licenses.txt"
   },
   "dependencies": {
     "@actions/core": "^1.8.2",
