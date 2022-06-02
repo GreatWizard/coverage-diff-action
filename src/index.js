@@ -55,6 +55,7 @@ async function run() {
     const badgeFilename = core.getInput("badge-filename");
 
     core.info("Saving json-summary report into the repo wiki");
+    core.info(`From: ${coverageFilename} to: ${path.join(WIKI_PATH, baseSummaryFilename)}`);
     await copyFile(coverageFilename, path.join(WIKI_PATH, baseSummaryFilename));
 
     if (BadgeEnabled) {
@@ -107,8 +108,6 @@ async function run() {
   }
 }
 
-try {
-  run();
-} catch (error) {
+run().catch(error => {
   core.setFailed(error.message);
-}
+})
