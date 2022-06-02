@@ -36,7 +36,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@actions/core", "npm:1.8.2"],\
             ["@actions/github", "npm:5.0.3"],\
             ["@vercel/ncc", "npm:0.34.0"],\
-            ["coverage-diff", "npm:1.6.1"],\
+            ["coverage-diff", "npm:3.0.0"],\
             ["simple-git", "npm:3.7.1"]\
           ],\
           "linkType": "SOFT"\
@@ -468,11 +468,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["coverage-diff", [\
-        ["npm:1.6.1", {\
-          "packageLocation": "./.yarn/cache/coverage-diff-npm-1.6.1-b9864e6fed-d290fb12ea.zip/node_modules/coverage-diff/",\
+        ["npm:3.0.0", {\
+          "packageLocation": "./.yarn/cache/coverage-diff-npm-3.0.0-697a06da53-7a658bd09e.zip/node_modules/coverage-diff/",\
           "packageDependencies": [\
-            ["coverage-diff", "npm:1.6.1"],\
-            ["markdown-table", "npm:1.1.1"]\
+            ["coverage-diff", "npm:3.0.0"],\
+            ["markdown-table", "npm:2.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -485,7 +485,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@actions/core", "npm:1.8.2"],\
             ["@actions/github", "npm:5.0.3"],\
             ["@vercel/ncc", "npm:0.34.0"],\
-            ["coverage-diff", "npm:1.6.1"],\
+            ["coverage-diff", "npm:3.0.0"],\
             ["simple-git", "npm:3.7.1"]\
           ],\
           "linkType": "SOFT"\
@@ -846,10 +846,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["markdown-table", [\
-        ["npm:1.1.1", {\
-          "packageLocation": "./.yarn/cache/markdown-table-npm-1.1.1-b7c7e1172f-1df52d11b4.zip/node_modules/markdown-table/",\
+        ["npm:2.0.0", {\
+          "packageLocation": "./.yarn/cache/markdown-table-npm-2.0.0-a9c10c8e83-9bb634a930.zip/node_modules/markdown-table/",\
           "packageDependencies": [\
-            ["markdown-table", "npm:1.1.1"]\
+            ["markdown-table", "npm:2.0.0"],\
+            ["repeat-string", "npm:1.6.1"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -1115,6 +1116,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["inherits", "npm:2.0.4"],\
             ["string_decoder", "npm:1.3.0"],\
             ["util-deprecate", "npm:1.0.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["repeat-string", [\
+        ["npm:1.6.1", {\
+          "packageLocation": "./.yarn/cache/repeat-string-npm-1.6.1-bc8e388655-1b809fc6db.zip/node_modules/repeat-string/",\
+          "packageDependencies": [\
+            ["repeat-string", "npm:1.6.1"]\
           ],\
           "linkType": "HARD"\
         }]\

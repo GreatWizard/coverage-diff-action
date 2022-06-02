@@ -370,17 +370,17 @@ __metadata:
     "@actions/core": ^1.8.2
     "@actions/github": ^5.0.3
     "@vercel/ncc": ^0.34.0
-    coverage-diff: ^1.6.1
+    coverage-diff: ^3.0.0
     simple-git: ^3.7.1
   languageName: unknown
   linkType: soft
 
-"coverage-diff@npm:^1.6.1":
-  version: 1.6.1
-  resolution: "coverage-diff@npm:1.6.1"
+"coverage-diff@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "coverage-diff@npm:3.0.0"
   dependencies:
-    markdown-table: 1.1.1
-  checksum: d290fb12eae0e5b6f03f4367d5babaa12b8ec87b2bb7d0b1bc550f188f6081a24275a4597e4b1248443d4d779d3410be0aa27385a0217cbd665b965f9922f7ad
+    markdown-table: 2.0.0
+  checksum: 7a658bd09eac04df4d38357f3da9d7b2690cfd4fb8b2f15d91fdef1f19e31dc63898217e3e271b1ac3ce2fcd61f58295c9b206944734e6be17b292966ae3537c
   languageName: node
   linkType: hard
 
@@ -679,10 +679,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"markdown-table@npm:1.1.1":
-  version: 1.1.1
-  resolution: "markdown-table@npm:1.1.1"
-  checksum: 1df52d11b4af828969d371f70dd6255ad5cbe51c33cea90eab36dea6704d285289f976506696a805294291cc6c7c09a37e129cb74f7895806075903153703209
+"markdown-table@npm:2.0.0":
+  version: 2.0.0
+  resolution: "markdown-table@npm:2.0.0"
+  dependencies:
+    repeat-string: ^1.0.0
+  checksum: 9bb634a9300016cbb41216c1eab44c74b6b7083ac07872e296f900a29449cf0e260ece03fa10c3e9784ab94c61664d1d147da0315f95e1336e2bdcc025615c90
   languageName: node
   linkType: hard
 
@@ -911,6 +913,13 @@ __metadata:
     string_decoder: ^1.1.1
     util-deprecate: ^1.0.1
   checksum: d4ea81502d3799439bb955a3a5d1d808592cf3133350ed352aeaa499647858b27b1c4013984900238b0873ec8d0d8defce72469fb7a83e61d53f5ad61cb80dc8
+  languageName: node
+  linkType: hard
+
+"repeat-string@npm:^1.0.0":
+  version: 1.6.1
+  resolution: "repeat-string@npm:1.6.1"
+  checksum: 1b809fc6db97decdc68f5b12c4d1a671c8e3f65ec4a40c238bc5200e44e85bcc52a54f78268ab9c29fcf5fe4f1343e805420056d1f30fa9a9ee4c2d93e3cc6c0
   languageName: node
   linkType: hard
 
