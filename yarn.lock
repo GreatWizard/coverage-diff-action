@@ -5,7 +5,7 @@ __metadata:
   version: 6
   cacheKey: 8
 
-"@actions/core@npm:^1.6.0":
+"@actions/core@npm:^1.8.2":
   version: 1.8.2
   resolution: "@actions/core@npm:1.8.2"
   dependencies:
@@ -14,7 +14,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@actions/github@npm:^5.0.0":
+"@actions/github@npm:^5.0.3":
   version: 5.0.3
   resolution: "@actions/github@npm:5.0.3"
   dependencies:
@@ -195,7 +195,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vercel/ncc@npm:^0.33.1":
+"@vercel/ncc@npm:^0.33.4":
   version: 0.33.4
   resolution: "@vercel/ncc@npm:0.33.4"
   dependencies:
@@ -367,15 +367,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "coverage-diff-action@workspace:."
   dependencies:
-    "@actions/core": ^1.6.0
-    "@actions/github": ^5.0.0
-    "@vercel/ncc": ^0.33.1
-    coverage-diff: ^1.6.0
-    simple-git: ^3.1.1
+    "@actions/core": ^1.8.2
+    "@actions/github": ^5.0.3
+    "@vercel/ncc": ^0.33.4
+    coverage-diff: ^1.6.1
+    simple-git: ^3.7.1
   languageName: unknown
   linkType: soft
 
-"coverage-diff@npm:^1.6.0":
+"coverage-diff@npm:^1.6.1":
   version: 1.6.1
   resolution: "coverage-diff@npm:1.6.1"
   dependencies:
@@ -971,7 +971,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-git@npm:^3.1.1":
+"simple-git@npm:^3.7.1":
   version: 3.7.1
   resolution: "simple-git@npm:3.7.1"
   dependencies:
