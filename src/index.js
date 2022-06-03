@@ -58,7 +58,7 @@ async function run() {
     core.info("Saving json-summary report into the repo wiki");
     core.info(`From: ${coverageFilename} to: ${path.join(WIKI_PATH, baseSummaryFilename)}`);
     const fileStat = await stat(coverageFilename);
-    core.info(fileStat);
+    core.info(`Is it a file? ${fileStat.isFile()} Size: ${fileStat.size}`);
     await copyFile(coverageFilename, path.join(WIKI_PATH, baseSummaryFilename));
 
     if (BadgeEnabled) {
