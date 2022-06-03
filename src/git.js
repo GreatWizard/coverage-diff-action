@@ -11,9 +11,11 @@ async function gitClone(url, wikiPath) {
 async function gitUpdate(wikiPath) {
   try {
     return simpleGit(wikiPath)
+        .status(['-v', '-v'])
         .addConfig("user.name", "Coverage Diff Action")
         .addConfig("user.email", "coverage-diff-action")
         .add("*")
+        .status(['-v', '-v'])
         .commit("Update coverage badge")
         .push();
   } catch (e) {
