@@ -42,7 +42,7 @@ async function run() {
   const head = JSON.parse(await readFile(coverageFilename, "utf8"));
 
   const pct = average(
-    Object.keys(head.total).map((t) => head.total[t].pct),
+    Object.keys(head.total).map((t) => head.total[t].pct).filter(Number.isFinite),
     0
   );
 
